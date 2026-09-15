@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Perception d'équipement</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1c3d5a">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-header-title">
+    <img src="icons/logo-gendarmerie.png" alt="Gendarmerie nationale" class="app-logo">
+    <h1>Perception d'équipement</h1>
+  </div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="form">Nouvelle fiche</button>
+    <button class="tab-btn" data-view="history">Historique</button>
+    <button class="tab-btn" data-view="settings">Réglages</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ===================== VUE FORMULAIRE ===================== -->
+  <section id="view-form" class="view active">
+    <form id="fiche-form" autocomplete="off">
+
+      <div class="wizard-progress">
+        <div class="wizard-dots">
+          <span class="dot active" data-step="1"></span>
+          <span class="dot" data-step="2"></span>
+          <span class="dot" data-step="3"></span>
+          <span class="dot" data-step="4"></span>
+        </div>
+        <div class="wizard-step-label">Étape <span id="wizard-step-num">1</span>/4 — <span id="wizard-step-title">Mission</span></div>
+      </div>
+
+      <div class="wizard-step active" data-step="1">
+      <fieldset>
+        <legend>Informations mission</legend>
+        <div class="field-row">
+          <label for="date-mission">Date / heure</label>
+          <input type="datetime-local" id="date-mission" required>
+        </div>
+        <div class="field-row">
+          <label for="unite-mission">Unité</label>
+          <input type="text" id="unite-mission" list="dl-unites" placeholder="Ex: Escadron 12/3 Bordeaux" required>
+          <datalist id="dl-unites"></datalist>
+        </div>
+      </fieldset>
+      </div>
+
+      <div class="wizard-step" data-step="2">
+      <fieldset>
+        <legend>Personnes</legend>
+
+        <div class="person-row">
+          <div class="field-row autocomplete-wrap person-nom">
+            <label for="nom-reserviste">Réserviste</label>
+            <input type="text" id="nom-reserviste" list="dl-reservistes" placeholder="Nom Prénom" required>
+            <datalist id="dl-reservistes"></datalist>
+          </div>
+          <div class="field-row person-nigend">
+            <label for="nigend-reserviste">NIGEND</label>
+            <input type="text" id="nigend-reserviste" placeholder="NIGEND" required>
+          </div>
+        </div>
+        <div class="field-row">
+          <label for="grade-reserviste">Grade du réserviste</label>
+          <select id="grade-reserviste" class="grade-select" required></select>
+        </div>
+
+        <div class="person-row">
+          <div class="field-row autocomplete-wrap person-nom">
+            <label for="nom-gendarme">Gendarme remettant</label>
+            <input type="text" id="nom-gendarme" list="dl-gendarmes" placeholder="Nom Prénom" required>
+            <datalist id="dl-gendarmes"></datalist>
+          </div>
+          <div class="field-row person-nigend">
+            <label for="nigend-gendarme">NIGEND</label>
+            <input type="text" id="nigend-gendarme" placeholder="NIGEND" required>
+          </div>
+        </div>
+        <div class="field-row">
+          <label for="grade-gendarme">Grade du gendarme remettant</label>
+          <select id="grade-gendarme" class="grade-select" required></select>
+        </div>
+      </fieldset>
+      </div>
+
+      <div class="wizard-step" data-step="3">
+      <fieldset>
+        <legend>Équipement remis</legend>
+        <table id="equip-table" class="equip-table">
+          <thead>
+            <tr>
+              <th>Remis</th>
+              <th>Désignation</th>
+              <th>Qté</th>
+              <th>N° série (optionnel)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="equip-tbody">
+            <!-- lignes ajoutées dynamiquement -->
+          </tbody>
+        </table>
+        <button type="button" id="btn-add-row" class="btn-secondary">+ Ajouter une ligne</button>
+        <datalist id="dl-series"></datalist>
+      </fieldset>
+      </div>
+
+      <div class="wizard-step" data-step="4">
+      <fieldset>
+        <legend>Signatures</legend>
+        <div class="signatures-grid">
+          <div class="sig-block">
+            <p>Signature du réserviste</p>
+            <canvas id="sig-reserviste" class="sig-canvas"></canvas>
+            <button type="button" class="btn-secondary btn-clear-sig" data-target="sig-reserviste">Effacer</button>
+          </div>
+          <div class="sig-block">
+            <p>Signature du gendarme remettant</p>
+            <canvas id="sig-gendarme" class="sig-canvas"></canvas>
+            <button type="button" class="btn-secondary btn-clear-sig" data-target="sig-gendarme">Effacer</button>
+          </div>
+        </div>
+      </fieldset>
+      </div>
+
+      <div class="form-actions wizard-nav">
+        <button type="button" id="btn-wizard-prev" class="btn-secondary" disabled>← Précédent</button>
+        <button type="button" id="btn-wizard-next" class="btn-primary">Suivant →</button>
+        <button type="submit" id="btn-wizard-submit" class="btn-primary" hidden>Enregistrer la fiche</button>
+      </div>
+
+    </form>
+  </section>
+
+  <!-- ===================== VUE HISTORIQUE ===================== -->
+  <section id="view-history" class="view">
+    <div class="field-row">
+      <input type="search" id="search-history" placeholder="Rechercher par nom, unité...">
+    </div>
+    <div class="date-nav-row">
+      <button type="button" id="btn-prev-day" class="btn-nav" aria-label="Jour précédent">◀</button>
+      <input type="date" id="filter-date" class="date-nav-input">
+      <button type="button" id="btn-next-day" class="btn-nav" aria-label="Jour suivant">▶</button>
+      <button type="button" id="btn-today" class="btn-nav btn-nav-text">Aujourd'hui</button>
+      <button type="button" id="btn-all-dates" class="btn-nav btn-nav-text">Tout</button>
+    </div>
+    <div id="history-list" class="history-list"></div>
+  </section>
+
+  <!-- ===================== VUE REGLAGES ===================== -->
+  <section id="view-settings" class="view">
+    <fieldset>
+      <legend>Équipements par défaut</legend>
+      <p class="settings-hint">Ces lignes seront proposées automatiquement à l'ouverture d'une nouvelle fiche.</p>
+      <table id="default-equip-table" class="equip-table">
+        <thead>
+          <tr><th></th><th>Désignation</th><th>Qté par défaut</th><th>N° série requis</th><th></th></tr>
+        </thead>
+        <tbody id="default-equip-tbody"></tbody>
+      </table>
+      <button type="button" id="btn-add-default-row" class="btn-secondary">+ Ajouter un équipement</button>
+      <div class="form-actions">
+        <button type="button" id="btn-save-defaults" class="btn-primary">Enregistrer les réglages</button>
+      </div>
+    </fieldset>
+  </section>
+
+  <!-- ===================== VUE RESTITUTION ===================== -->
+  <section id="view-restitution" class="view">
+    <fieldset>
+      <legend>Réintégration d'équipement</legend>
+      <div id="restitution-info"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Gendarme qui réintègre</legend>
+      <div class="person-row">
+        <div class="field-row autocomplete-wrap person-nom">
+          <label for="nom-gendarme-restitution">Nom</label>
+          <input type="text" id="nom-gendarme-restitution" list="dl-gendarmes" placeholder="Nom Prénom" required>
+        </div>
+        <div class="field-row person-nigend">
+          <label for="nigend-gendarme-restitution">NIGEND</label>
+          <input type="text" id="nigend-gendarme-restitution" placeholder="NIGEND" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <label for="grade-gendarme-restitution">Grade</label>
+        <select id="grade-gendarme-restitution" class="grade-select" required></select>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Équipement à réintégrer</legend>
+      <table id="restitution-equip-table" class="equip-table">
+        <thead>
+          <tr><th>Réintégré</th><th>Désignation</th><th>Qté</th><th>N° série</th></tr>
+        </thead>
+        <tbody id="restitution-equip-tbody"></tbody>
+      </table>
+    </fieldset>
+
+    <fieldset>
+      <legend>Signatures</legend>
+      <div class="signatures-grid">
+        <div class="sig-block">
+          <p>Signature du réserviste</p>
+          <canvas id="sig-restitution-reserviste" class="sig-canvas"></canvas>
+          <button type="button" class="btn-secondary btn-clear-sig" data-target="sig-restitution-reserviste">Effacer</button>
+        </div>
+        <div class="sig-block">
+          <p>Signature du gendarme</p>
+          <canvas id="sig-restitution-gendarme" class="sig-canvas"></canvas>
+          <button type="button" class="btn-secondary btn-clear-sig" data-target="sig-restitution-gendarme">Effacer</button>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="form-actions">
+      <button type="button" id="btn-cancel-restitution" class="btn-secondary">Annuler</button>
+      <button type="button" id="btn-valider-restitution" class="btn-primary">Valider la réintégration</button>
+    </div>
+  </section>
+
+  <!-- ===================== VUE DETAIL / IMPRESSION ===================== -->
+  <section id="view-print" class="view print-view">
+    <div id="print-header" class="print-header">
+      <img src="icons/logo-gendarmerie.png" alt="Gendarmerie nationale" class="print-logo">
+    </div>
+    <div id="print-content"></div>
+    <div class="form-actions no-print">
+      <button type="button" id="btn-back-history" class="btn-secondary">Retour</button>
+      <button type="button" id="btn-print" class="btn-primary">Imprimer / Exporter PDF</button>
+    </div>
+  </section>
+
+</main>
+
+<template id="default-equip-row-template">
+  <tr>
+    <td class="col-order">
+      <div class="order-btns">
+        <button type="button" class="btn-move-up" aria-label="Monter">▲</button>
+        <button type="button" class="btn-move-down" aria-label="Descendre">▼</button>
+      </div>
+    </td>
+    <td><input type="text" class="default-equip-designation" placeholder="Ex: Arme de service" required></td>
+    <td class="col-qty"><input type="number" class="default-equip-qty" min="1" value="1" required></td>
+    <td class="col-check"><input type="checkbox" class="default-equip-serie-requise"></td>
+    <td class="col-del"><button type="button" class="btn-del-row" aria-label="Supprimer la ligne">✕</button></td>
+  </tr>
+</template>
+
+<template id="restitution-row-template">
+  <tr>
+    <td class="col-check"><input type="checkbox" class="restitution-valide" checked></td>
+    <td class="restitution-designation"></td>
+    <td class="restitution-qty"></td>
+    <td class="restitution-serie"></td>
+  </tr>
+</template>
+
+<template id="equip-row-template">
+  <tr>
+    <td class="col-check"><input type="checkbox" class="equip-remis" checked></td>
+    <td><input type="text" class="equip-designation" placeholder="Ex: Arme de service, gilet pare-balles..." required></td>
+    <td class="col-qty"><input type="number" class="equip-qty" min="1" value="1" required></td>
+    <td><input type="text" class="equip-serial" list="dl-series" placeholder="Optionnel"></td>
+    <td class="col-del"><button type="button" class="btn-del-row" aria-label="Supprimer la ligne">✕</button></td>
+  </tr>
+</template>
+
+<script src="js/db.js"></script>
+<script src="js/signature.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
