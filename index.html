@@ -102,6 +102,7 @@
               <th>Désignation</th>
               <th>Qté</th>
               <th>N° série (optionnel)</th>
+              <th>Étui</th>
               <th></th>
             </tr>
           </thead>
@@ -163,7 +164,7 @@
       <p class="settings-hint">Ces lignes seront proposées automatiquement à l'ouverture d'une nouvelle fiche.</p>
       <table id="default-equip-table" class="equip-table">
         <thead>
-          <tr><th></th><th>Désignation</th><th>Qté par défaut</th><th>N° série requis</th><th></th></tr>
+          <tr><th></th><th>Désignation</th><th>Qté par défaut</th><th>N° série requis</th><th>Étui requis</th><th>Coché par défaut</th><th></th></tr>
         </thead>
         <tbody id="default-equip-tbody"></tbody>
       </table>
@@ -203,7 +204,7 @@
       <legend>Équipement à réintégrer</legend>
       <table id="restitution-equip-table" class="equip-table">
         <thead>
-          <tr><th>Réintégré</th><th>Désignation</th><th>Qté</th><th>N° série</th></tr>
+          <tr><th>Réintégré</th><th>Désignation</th><th>Qté</th><th>N° série</th><th>Étui</th></tr>
         </thead>
         <tbody id="restitution-equip-tbody"></tbody>
       </table>
@@ -256,6 +257,8 @@
     <td><input type="text" class="default-equip-designation" placeholder="Ex: Arme de service" required></td>
     <td class="col-qty"><input type="number" class="default-equip-qty" min="1" value="1" required></td>
     <td class="col-check"><input type="checkbox" class="default-equip-serie-requise"></td>
+    <td class="col-check"><input type="checkbox" class="default-equip-etui-requis"></td>
+    <td class="col-check"><input type="checkbox" class="default-equip-remis-defaut" title="Cette ligne sera précochée comme remise à l'ouverture d'une nouvelle fiche (ex: l'arme)"></td>
     <td class="col-del"><button type="button" class="btn-del-row" aria-label="Supprimer la ligne">✕</button></td>
   </tr>
 </template>
@@ -266,15 +269,17 @@
     <td class="restitution-designation"></td>
     <td class="restitution-qty"></td>
     <td class="restitution-serie"></td>
+    <td class="restitution-etui"></td>
   </tr>
 </template>
 
 <template id="equip-row-template">
   <tr>
-    <td class="col-check"><input type="checkbox" class="equip-remis" checked></td>
+    <td class="col-check"><input type="checkbox" class="equip-remis"></td>
     <td><input type="text" class="equip-designation" placeholder="Ex: Arme de service, gilet pare-balles..." required></td>
     <td class="col-qty"><input type="number" class="equip-qty" min="1" value="1" required></td>
     <td><input type="text" class="equip-serial" list="dl-series" placeholder="Optionnel"></td>
+    <td class="col-check"><input type="checkbox" class="equip-etui" style="display:none"></td>
     <td class="col-del"><button type="button" class="btn-del-row" aria-label="Supprimer la ligne">✕</button></td>
   </tr>
 </template>

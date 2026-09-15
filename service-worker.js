@@ -1,4 +1,4 @@
-const CACHE_NAME = 'perception-equipement-v17';
+const CACHE_NAME = 'perception-equipement-v19';
 const ASSETS = [
   './',
   './index.html',

@@ -151,7 +151,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (prefill.serieRequise === false) {
         serialInput.style.display = 'none';
       }
-      if (prefill.remis === false) clone.querySelector('.equip-remis').checked = false;
+      const remisInput = clone.querySelector('.equip-remis');
+      if (prefill.remis !== undefined) {
+        remisInput.checked = prefill.remis;
+      } else if (prefill.remisParDefaut === true) {
+        remisInput.checked = true;
+      }
+
+      const etuiInput = clone.querySelector('.equip-etui');
+      if (prefill.etuiRequis === true || prefill.etui !== undefined) {
+        etuiInput.style.display = '';
+        if (prefill.etui !== undefined) etuiInput.checked = prefill.etui;
+      }
     }
     clone.querySelector('.btn-del-row').addEventListener('click', (e) => {
       e.target.closest('tr').remove();
@@ -289,12 +300,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    const equipRows = [...equipTbody.querySelectorAll('tr')].map(row => ({
-      remis: row.querySelector('.equip-remis').checked,
-      designation: row.querySelector('.equip-designation').value.trim(),
-      quantite: Number(row.querySelector('.equip-qty').value) || 1,
-      serie: row.querySelector('.equip-serial').value.trim()
-    })).filter(r => r.designation);
+    const equipRows = [...equipTbody.querySelectorAll('tr')].map(row => {
+      const etuiInput = row.querySelector('.equip-etui');
+      const rowData = {
+        remis: row.querySelector('.equip-remis').checked,
+        designation: row.querySelector('.equip-designation').value.trim(),
+        quantite: Number(row.querySelector('.equip-qty').value) || 1,
+        serie: row.querySelector('.equip-serial').value.trim()
+      };
+      if (etuiInput.style.display !== 'none') rowData.etui = etuiInput.checked;
+      return rowData;
+    }).filter(r => r.designation);
 
     if (equipRows.length === 0) {
       alert('Ajoutez au moins une ligne d\'équipement.');
@@ -463,7 +479,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <p><strong>Réintégré le :</strong> ${formatDate(r.date)}</p>
         <p><strong>Gendarme réintégrant :</strong> ${escapeHtml(r.gradeGendarme)} ${escapeHtml(r.gendarme)} (NIGEND ${escapeHtml(r.nigendGendarme)})</p>
         <table>
-          <thead><tr><th>Réintégré</th><th>Désignation</th><th>Qté</th><th>N° série</th></tr></thead>
+          <thead><tr><th>Réintégré</th><th>Désignation</th><th>Qté</th><th>N° série</th><th>Étui</th></tr></thead>
           <tbody>
             ${(r.equipementValide || []).map(e => `
               <tr>
@@ -471,6 +487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td>${escapeHtml(e.designation)}</td>
                 <td>${e.quantite}</td>
                 <td>${escapeHtml(e.serie || '-')}</td>
+                <td>${e.etui === undefined ? '-' : (e.etui ? 'Oui' : 'Non')}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -495,7 +512,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <p><strong>Réserviste :</strong> ${escapeHtml(f.gradeReserviste)} ${escapeHtml(f.reserviste)} (NIGEND ${escapeHtml(f.nigendReserviste)})</p>
       <p><strong>Gendarme remettant :</strong> ${escapeHtml(f.gradeGendarme)} ${escapeHtml(f.gendarme)} (NIGEND ${escapeHtml(f.nigendGendarme)})</p>
       <table>
-        <thead><tr><th>Remis</th><th>Désignation</th><th>Qté</th><th>N° série</th></tr></thead>
+        <thead><tr><th>Remis</th><th>Désignation</th><th>Qté</th><th>N° série</th><th>Étui</th></tr></thead>
         <tbody>
           ${f.equipement.map(e => `
             <tr>
@@ -503,6 +520,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <td>${escapeHtml(e.designation)}</td>
               <td>${e.quantite}</td>
               <td>${escapeHtml(e.serie || '-')}</td>
+              <td>${e.etui === undefined ? '-' : (e.etui ? 'Oui' : 'Non')}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -553,6 +571,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       clone.querySelector('.restitution-designation').textContent = e.designation;
       clone.querySelector('.restitution-qty').textContent = e.quantite;
       clone.querySelector('.restitution-serie').textContent = e.serie || '-';
+      clone.querySelector('.restitution-etui').textContent = e.etui === undefined ? '-' : (e.etui ? 'Oui' : 'Non');
       restitutionEquipTbody.appendChild(clone);
     });
 
@@ -619,6 +638,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       clone.querySelector('.default-equip-designation').value = prefill.designation || '';
       clone.querySelector('.default-equip-qty').value = prefill.quantite || 1;
       clone.querySelector('.default-equip-serie-requise').checked = !!prefill.serieRequise;
+      clone.querySelector('.default-equip-etui-requis').checked = !!prefill.etuiRequis;
+      clone.querySelector('.default-equip-remis-defaut').checked = !!prefill.remisParDefaut;
     }
     clone.querySelector('.btn-del-row').addEventListener('click', (e) => {
       e.target.closest('tr').remove();
@@ -654,7 +675,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rows = [...defaultEquipTbody.querySelectorAll('tr')].map(row => ({
       designation: row.querySelector('.default-equip-designation').value.trim(),
       quantite: Number(row.querySelector('.default-equip-qty').value) || 1,
-      serieRequise: row.querySelector('.default-equip-serie-requise').checked
+      serieRequise: row.querySelector('.default-equip-serie-requise').checked,
+      etuiRequis: row.querySelector('.default-equip-etui-requis').checked,
+      remisParDefaut: row.querySelector('.default-equip-remis-defaut').checked
     })).filter(r => r.designation);
 
     await DB.setReglage('equipements_defaut', rows);
