@@ -1,4 +1,4 @@
-const CACHE_NAME = 'perception-equipement-v19';
+const CACHE_NAME = 'perception-equipement-v20';
 const ASSETS = [
   './',
   './index.html',
@@ -8,12 +8,18 @@ const ASSETS = [
   './js/signature.js',
   './js/app.js',
   './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
   './icons/logo-gendarmerie.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache =>
+      Promise.allSettled(ASSETS.map(asset =>
+        cache.add(asset).catch(err => console.warn('Echec mise en cache:', asset, err))
+      ))
+    )
   );
   self.skipWaiting();
 });
